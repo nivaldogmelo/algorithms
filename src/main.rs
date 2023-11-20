@@ -60,7 +60,9 @@ fn main() {
     println!("{} components", union.count());
 
     let mut input = load_from_file("1Mints.txt");
+    // let mut input = vec![4, 3, 6, 5, 7, 9, 1, 12, 14, 15, 11, 8, 0, 10, 13, 2];
 
-    sorting::td_merge_sort::merge_sort(&mut input.as_mut().unwrap());
+    // sorting::bu_merge_sort::merge_sort(&mut input);
+    sorting::bu_merge_sort::merge_sort(&mut input.as_mut().unwrap());
     println!("{:?}", Some(input));
 }
