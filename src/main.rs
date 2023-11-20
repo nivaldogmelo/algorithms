@@ -59,8 +59,8 @@ fn main() {
 
     println!("{} components", union.count());
 
-    let mut input = load_from_file("1Kints.txt");
+    let mut input = load_from_file("1Mints.txt");
 
-    sorting::selection_sort::sort(&mut input.as_mut().unwrap());
+    sorting::td_merge_sort::merge_sort(&mut input.as_mut().unwrap());
     println!("{:?}", Some(input));
 }
