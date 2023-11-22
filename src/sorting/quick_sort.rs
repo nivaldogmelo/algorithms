@@ -7,9 +7,9 @@ fn sort(v: &mut Vec<i64>, lo: usize, hi: usize) {
 	return;
     }
 
-    let j = partition(v, lo, hi);
+    let mut j = partition(v, lo, hi);
     if j == 0 {
-	return;
+	j += 1;
     }
     sort(v, lo, j - 1);
     sort(v, j + 1, hi);
