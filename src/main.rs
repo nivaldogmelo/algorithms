@@ -64,5 +64,5 @@ fn main() {
 
     // sorting::quick_sort::quick_sort(&mut input);
     sorting::quick_sort::quick_sort(&mut input.as_mut().unwrap());
-    // println!("{:?}", Some(input));
+    println!("{:?}", input);
 }

@@ -1,4 +1,10 @@
+extern crate rand;
+
+use rand::seq::SliceRandom;
+use rand::thread_rng;
+
 pub fn quick_sort(v: &mut Vec<i64>) {
+    v.shuffle(&mut thread_rng());
     sort(v, 0, v.len() - 1);
 }
 
@@ -44,4 +50,36 @@ fn partition(v: &mut Vec<i64>, lo: usize, hi: usize) -> usize {
 
     v.swap(lo, j);
     j
+}
+
+pub fn quick_sort3(v: &mut Vec<i64>) {
+    sort3(v, 0, v.len() - 1);
+}
+
+fn sort3(v: &mut Vec<i64>, lo: usize, hi: usize) {
+    if hi <= lo {
+	return;
+    }
+
+    let mut lt = lo;
+    let mut i = lo + 1;
+    let mut gt = hi;
+    let part_item = v[lo];
+
+    while i <= gt {
+	let cmp = v[i] - part_item;
+
+	if cmp < 0 {
+	    lt += 1;
+	    i += 1;
+	    v.swap(lo, i);
+	} else if cmp > 0 {
+	    gt -= 1;
+	    v.swap(i, gt);
+	} else {
+	    i += 1;
+	}
+    }
+    sort(v, lo, lt - 1);
+    sort(v, gt + 1, hi);
 }
