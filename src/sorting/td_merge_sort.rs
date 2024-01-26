@@ -1,11 +1,11 @@
-pub fn merge_sort(v: &mut Vec<i64>) {
+pub fn merge_sort<T: Ord + Copy>(v: &mut Vec<T>) {
     println!("sort(v, {}, {})", 0, v.len() - 1);
     sort(v, 0, v.len() - 1);
 }
 
-fn merge(v: &mut Vec<i64>, lo: usize, mid: usize, hi: usize) {
-    let mut left: Vec<i64> = Vec::new();
-    let mut right: Vec<i64> = Vec::new();
+fn merge<T: Ord + Copy>(v: &mut Vec<T>, lo: usize, mid: usize, hi: usize) {
+    let mut left: Vec<T> = Vec::new();
+    let mut right: Vec<T> = Vec::new();
 
     let mut i = 0;
     let mut j = 0;
@@ -35,7 +35,7 @@ fn merge(v: &mut Vec<i64>, lo: usize, mid: usize, hi: usize) {
     }
 }
 
-fn sort(v: &mut Vec<i64>, lo: usize, hi: usize) {
+fn sort<T: Ord + Copy>(v: &mut Vec<T>, lo: usize, hi: usize) {
     if hi <= lo {
 	return;
     }
@@ -44,4 +44,20 @@ fn sort(v: &mut Vec<i64>, lo: usize, hi: usize) {
     sort(v, lo, mid);
     sort(v, mid + 1, hi);
     merge(v, lo, mid, hi);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::sort;
+
+    #[test]
+    fn basic() {
+	let mut res = vec!["d", "b", "c", "a", "e"];
+	let mut clone = res.clone();
+	let size = res.len();
+
+	sort(&mut res, 0, size - 1);
+	clone.sort();
+	assert_eq!(clone, res);
+    }
 }

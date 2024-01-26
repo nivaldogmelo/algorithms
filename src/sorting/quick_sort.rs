@@ -3,12 +3,12 @@ extern crate rand;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-pub fn quick_sort(v: &mut Vec<i64>) {
+pub fn quick_sort<T: Ord + Copy>(v: &mut Vec<T>) {
     v.shuffle(&mut thread_rng());
     sort(v, 0, v.len() - 1);
 }
 
-fn sort(v: &mut Vec<i64>, lo: usize, hi: usize) {
+fn sort<T: Ord + Copy>(v: &mut Vec<T>, lo: usize, hi: usize) {
     if hi <= lo {
 	return;
     }
@@ -21,7 +21,7 @@ fn sort(v: &mut Vec<i64>, lo: usize, hi: usize) {
     sort(v, j + 1, hi);
 }
 
-fn partition(v: &mut Vec<i64>, lo: usize, hi: usize) -> usize {
+fn partition<T: Ord + Copy>(v: &mut Vec<T>, lo: usize, hi: usize) -> usize {
     let mut j = hi;
     let mut i = lo + 1;
     let part_item = v[lo];
@@ -52,34 +52,18 @@ fn partition(v: &mut Vec<i64>, lo: usize, hi: usize) -> usize {
     j
 }
 
-pub fn quick_sort3(v: &mut Vec<i64>) {
-    sort3(v, 0, v.len() - 1);
-}
+#[cfg(test)]
+mod tests {
+    use super::sort;
 
-fn sort3(v: &mut Vec<i64>, lo: usize, hi: usize) {
-    if hi <= lo {
-	return;
+    #[test]
+    fn basic() {
+	let mut res = vec!["d", "b", "c", "a", "e"];
+	let mut clone = res.clone();
+	let size = res.len() - 1;
+
+	sort(&mut res, 0, size);
+	clone.sort();
+	assert_eq!(clone, res);
     }
-
-    let mut lt = lo;
-    let mut i = lo + 1;
-    let mut gt = hi;
-    let part_item = v[lo];
-
-    while i <= gt {
-	let cmp = v[i] - part_item;
-
-	if cmp < 0 {
-	    lt += 1;
-	    i += 1;
-	    v.swap(lo, i);
-	} else if cmp > 0 {
-	    gt -= 1;
-	    v.swap(i, gt);
-	} else {
-	    i += 1;
-	}
-    }
-    sort(v, lo, lt - 1);
-    sort(v, gt + 1, hi);
 }

@@ -1,156 +1,99 @@
-use std::ptr::NonNull;
-
-pub struct LinkedList<T> {
-    pub val: Option<T>,
-    pub next: Option<NonNull<LinkedList<T>>>,
+pub struct List<T> {
+    head: Link<T>,
 }
 
-impl LinkedList<i32> {
-    // # Creates an empty LinkedList that may hold i32 values
-    //
-    // # Example
-    // ```
-    // let list = linked_list::LinkedList::<i32>::new();
-    // ```
-    pub fn new() -> LinkedList<i32> {
-	LinkedList {
-	    val: None,
-	    next: None,
+type Link<T> = Option<Box<Node<T>>>;
+
+struct Node<T> {
+    elem: T,
+    next: Link<T>,
+}
+
+pub struct IntoIter<T>(List<T>);
+
+pub struct Iter<'a, T> {
+    next: Option<&'a Node<T>>,
+}
+
+pub struct IterMut<'a, T> {
+    next: Option<&'a mut Node<T>>,
+}
+
+impl<T> List<T> {
+    pub fn new() -> Self {
+	List { head: None }
+    }
+
+    pub fn into_iter(self) -> IntoIter<T> {
+	IntoIter(self)
+    }
+
+    pub fn iter(&self) -> Iter<T> {
+	Iter {
+	    next: self.head.as_deref(),
 	}
     }
 
-    pub fn push_left(&mut self, x: i32) {
-	// allocate on the heap
-	let node = Box::new(LinkedList::<i32> {
-	    val: Some(x),
-	    next: None,
+    pub fn iter_mut(&mut self) -> IterMut<'_, T> {
+	IterMut {
+	    next: self.head.as_deref_mut(),
+	}
+    }
+
+    pub fn push(&mut self, elem: T) {
+	let node = Box::new(Node {
+	    elem,
+	    next: self.head.take(),
 	});
 
-	if self.next.is_none() {
-	    // our list is empty, take control over the raw pointer
-	    let pter: NonNull<LinkedList<i32>> = Box::leak(node).into();
-
-	    // head is now the pointer
-	    self.next = Some(pter);
-	} else {
-	    // our list already has an element. Take control over the raw pointer
-	    // as mutable
-	    let mut pter: NonNull<LinkedList<i32>> = Box::leak(node).into();
-	    unsafe {
-		// new node should point to current head
-		pter.as_mut().next = self.next;
-	    }
-
-	    // head is now the pointer
-	    self.next = Some(pter);
-	}
+	self.head = Some(node);
     }
 
-    pub fn push_right(&mut self, x: i32) {
-	// allocate on the heap
-	let node = Box::new(LinkedList::<i32> {
-	    val: Some(x),
-	    next: None,
-	});
-
-	if self.next.is_none() {
-	    // our list is empty, take control over the raw pointer
-	    let pter: NonNull<LinkedList<i32>> = Box::leak(node).into();
-
-	    // head is now the pointer
-	    self.next = Some(pter);
-	} else {
-	    // our list already has an element. Take control over the raw pointer
-	    // as mutable
-	    let pter: NonNull<LinkedList<i32>> = Box::leak(node).into();
-
-	    let mut node = self.next.unwrap();
-	    // Go until last node
-	    unsafe {
-		while node.as_mut().next.is_some() {
-		    node = node.as_mut().next.unwrap();
-		}
-		node.as_mut().next = Some(pter);
-	    }
-	}
+    pub fn pop(&mut self) -> Option<T> {
+	self.head.take().map(|node| {
+	    self.head = node.next;
+	    node.elem
+	})
     }
+}
 
-    pub fn pop_left(&mut self) -> Option<i32> {
-	// empty list
-	if self.next.is_none() {
-	    return None;
-	} else {
-	    let mut next = self.next.unwrap();
+impl<T> Iterator for IntoIter<T> {
+    type Item = T;
 
-	    // list has only one element
-	    let only_one: bool = unsafe { next.as_mut().next.is_none() };
-	    if only_one == true {
-		// pull the next element from the raw pointer
-		// and store it in a box, so memory free can work correctly
-		let next_box = unsafe { Box::from_raw(next.as_ptr()) };
-		self.next = None;
-		next_box.val
-	    } else {
-		// list has two or more elements
-		let next_of_next = unsafe { next.as_mut().next };
-		let next_box = unsafe { Box::from_raw(next.as_ptr()) };
-		self.next = next_of_next;
-		next_box.val
-	    }
-	}
+    fn next(&mut self) -> Option<Self::Item> {
+	self.0.pop()
     }
+}
 
-    pub fn pop_right(&mut self) -> Option<i32> {
-	// empty list
-	if self.next.is_none() {
-	    return None;
-	} else {
-	    let mut node = self.next.unwrap();
-	    let val: i32;
+impl<'a, T> Iterator for Iter<'a, T> {
+    type Item = &'a T;
 
-	    // list has only one element
-	    let only_one: bool = unsafe { node.as_mut().next.is_none() };
-	    if only_one == true {
-		// pull the next element from the raw pointer
-		// and store it in a box, so memory free can work correctly
-		let next_box = unsafe { Box::from_raw(node.as_ptr()) };
-		self.next = None;
-		next_box.val
-	    } else {
-		let mut old_node: NonNull<LinkedList<i32>>;
-		// Go until last node
-		unsafe {
-		    old_node = node;
-		    while node.as_mut().next.is_some() {
-			old_node = node;
-			node = node.as_mut().next.unwrap();
-		    }
-
-		    old_node.as_mut().next = None;
-		    val = node.as_mut().val.unwrap();
-		}
-
-		Some(val)
-	    }
-	}
+    fn next(&mut self) -> Option<&'a T> {
+	self.next.map(|node| {
+	    self.next = node.next.as_deref();
+	    &node.elem
+	})
     }
+}
 
-    pub fn collect(&self) -> Vec<i32> {
-	let mut result = Vec::<i32>::new();
-	if self.next.is_none() {
-	    return result;
+impl<'a, T> Iterator for IterMut<'a, T> {
+    type Item = &'a mut T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+	self.next.take().map(|node| {
+	    self.next = node.next.as_deref_mut();
+	    &mut node.elem
+	})
+    }
+}
+
+impl<T> Drop for List<T> {
+    fn drop(&mut self) {
+	let mut curr_link = self.head.take();
+
+	while let Some(mut boxed_node) = curr_link {
+	    curr_link = boxed_node.next.take();
 	}
-
-	let mut node = self.next.unwrap();
-	unsafe {
-	    result.push(node.as_mut().val.unwrap());
-	    while node.as_mut().next.is_some() {
-		node = node.as_mut().next.unwrap();
-		result.push(node.as_mut().val.unwrap());
-	    }
-	}
-
-	return result;
     }
 }
 
@@ -159,76 +102,64 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_push_left() {
-	let mut list: LinkedList<i32> = LinkedList::<i32>::new();
+    fn basics() {
+	let mut list = List::new();
 
-	list.push_left(1);
-	list.push_left(2);
-	list.push_left(3);
-	list.push_left(4);
+	assert_eq!(list.pop(), None);
 
-	assert_eq!(list.collect(), vec![4, 3, 2, 1]);
+	list.push(1);
+	list.push(2);
+	list.push(3);
+
+	assert_eq!(list.pop(), Some(3));
+	assert_eq!(list.pop(), Some(2));
+
+	list.push(4);
+	list.push(5);
+
+	assert_eq!(list.pop(), Some(5));
+	assert_eq!(list.pop(), Some(4));
+	assert_eq!(list.pop(), Some(1));
+	assert_eq!(list.pop(), None);
     }
 
     #[test]
-    fn test_push_right() {
-	let mut list: LinkedList<i32> = LinkedList::<i32>::new();
+    fn into_iter() {
+	let mut list = List::new();
+	list.push(1);
+	list.push(2);
+	list.push(3);
 
-	list.push_right(1);
-	list.push_right(2);
-	list.push_right(3);
-	list.push_right(4);
-
-	assert_eq!(list.collect(), vec![1, 2, 3, 4]);
+	let mut iter = list.into_iter();
+	assert_eq!(iter.next(), Some(3));
+	assert_eq!(iter.next(), Some(2));
+	assert_eq!(iter.next(), Some(1));
+	assert_eq!(iter.next(), None);
     }
 
     #[test]
-    fn test_pop_left() {
-	let mut list: LinkedList<i32> = LinkedList::<i32>::new();
+    fn iter() {
+	let mut list = List::new();
+	list.push(1);
+	list.push(2);
+	list.push(3);
 
-	list.push_left(1);
-	list.push_left(2);
-	list.push_left(3);
-	list.push_left(4);
-
-	let x = list.pop_left();
-	assert_eq!(x.unwrap(), 4);
-
-	let x = list.pop_left();
-	assert_eq!(x.unwrap(), 3);
-
-	let x = list.pop_left();
-	assert_eq!(x.unwrap(), 2);
-
-	let x = list.pop_left();
-	assert_eq!(x.unwrap(), 1);
-
-	let x = list.pop_left();
-	assert_eq!(x.is_none(), true);
+	let mut iter = list.iter();
+	assert_eq!(iter.next(), Some(&3));
+	assert_eq!(iter.next(), Some(&2));
+	assert_eq!(iter.next(), Some(&1));
     }
 
     #[test]
-    fn pop_right() {
-	let mut list: LinkedList<i32> = LinkedList::<i32>::new();
+    fn iter_mut() {
+	let mut list = List::new();
+	list.push(1);
+	list.push(2);
+	list.push(3);
 
-	list.push_right(1);
-	list.push_right(2);
-	list.push_right(3);
-	list.push_right(4);
-
-	let x = list.pop_right();
-	assert_eq!(x.unwrap(), 4);
-
-	let x = list.pop_right();
-	assert_eq!(x.unwrap(), 3);
-
-	let x = list.pop_right();
-	assert_eq!(x.unwrap(), 2);
-
-	let x = list.pop_right();
-	assert_eq!(x.unwrap(), 1);
-
-	let x = list.pop_right();
-	assert_eq!(x.is_none(), true);
+	let mut iter = list.iter_mut();
+	assert_eq!(iter.next(), Some(&mut 3));
+	assert_eq!(iter.next(), Some(&mut 2));
+	assert_eq!(iter.next(), Some(&mut 1));
     }
 }

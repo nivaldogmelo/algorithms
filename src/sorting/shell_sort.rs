@@ -1,4 +1,4 @@
-pub fn sort(v: &mut Vec<i64>) {
+pub fn sort<T: Ord>(v: &mut Vec<T>) {
     let mut h: usize = 1;
     let lenght = v.len();
 
@@ -15,5 +15,20 @@ pub fn sort(v: &mut Vec<i64>) {
 	    }
 	}
 	h = h / 3;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::sort;
+
+    #[test]
+    fn basic() {
+	let mut res = vec!["d", "b", "c", "a", "e"];
+	let mut clone = res.clone();
+
+	sort(&mut res);
+	clone.sort();
+	assert_eq!(clone, res);
     }
 }

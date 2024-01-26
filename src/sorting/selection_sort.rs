@@ -1,18 +1,28 @@
-pub fn sort(v: &mut Vec<i64>) {
+pub fn sort<T: Ord>(v: &mut Vec<T>) {
     let mut min;
-    let mut tmp;
 
-    for i in 0..v.len() {
-	min = v[i];
+    for i in 0..(v.len()) {
+	min = i;
 
 	for j in i..v.len() {
-	    if v[j] < min {
-		tmp = min;
-		min = v[j];
-		v[j] = tmp;
+	    if v[j] < v[min] {
+		v.swap(j, min);
 	    }
 	}
+    }
+}
 
-	v[i] = min;
+#[cfg(test)]
+mod tests {
+    use super::sort;
+
+    #[test]
+    fn basic() {
+	let mut res = vec!["d", "b", "c", "a", "e"];
+	let mut clone = res.clone();
+
+	sort(&mut res);
+	clone.sort();
+	assert_eq!(clone, res);
     }
 }

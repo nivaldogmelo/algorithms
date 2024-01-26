@@ -1,12 +1,12 @@
 use std::cmp;
 
-pub fn merge_sort(v: &mut Vec<i64>) {
+pub fn merge_sort<T: Ord + Copy>(v: &mut Vec<T>) {
     sort(v);
 }
 
-fn merge(v: &mut Vec<i64>, lo: usize, mid: usize, hi: usize) {
-    let mut left: Vec<i64> = Vec::new();
-    let mut right: Vec<i64> = Vec::new();
+fn merge<T: Ord + Copy>(v: &mut Vec<T>, lo: usize, mid: usize, hi: usize) {
+    let mut left: Vec<T> = Vec::new();
+    let mut right: Vec<T> = Vec::new();
 
     let mut i = 0;
     let mut j = 0;
@@ -36,7 +36,7 @@ fn merge(v: &mut Vec<i64>, lo: usize, mid: usize, hi: usize) {
     }
 }
 
-fn sort(v: &mut Vec<i64>) {
+fn sort<T: Ord + Copy>(v: &mut Vec<T>) {
     let hi = v.len();
     let mut len = 1;
 
@@ -48,5 +48,20 @@ fn sort(v: &mut Vec<i64>) {
 	}
 
 	len *= 2;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::sort;
+
+    #[test]
+    fn basic() {
+	let mut res = vec!["d", "b", "c", "a", "e"];
+	let mut clone = res.clone();
+
+	sort(&mut res);
+	clone.sort();
+	assert_eq!(clone, res);
     }
 }

@@ -3,6 +3,7 @@ use std::fs::{read_to_string, File};
 use std::io::{BufRead, BufReader, Error, ErrorKind};
 
 mod data_structures;
+mod search;
 mod sorting;
 mod union_find;
 
@@ -59,10 +60,16 @@ fn main() {
 
     // println!("{} components", union.count());
 
-    let mut input = load_from_file("1Mints.txt");
+    // let mut input = load_from_file("1Mints.txt");
     // let mut input = vec![4, 3, 6, 5, 7, 9, 1, 12, 14, 15, 11, 8, 0, 10, 13, 2];
 
     // sorting::quick_sort::quick_sort(&mut input);
-    sorting::quick_sort::quick_sort(&mut input.as_mut().unwrap());
-    println!("{:?}", input);
+    // sorting::quick_sort::quick_sort(&mut input.as_mut().unwrap());
+    // println!("{:?}", input);
+
+    let mut list = data_structures::linked_list_kv::List::<i64, i64>::new();
+    list.push(3, 4);
+
+    let search = search::unordered_linked_list::get(list, 2);
+    println!("{:?}", search)
 }

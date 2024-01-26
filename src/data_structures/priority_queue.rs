@@ -1,5 +1,3 @@
-use crate::sorting::td_merge_sort;
-
 pub struct PriorityQueue {
     pub val: Vec<i64>,
 }
