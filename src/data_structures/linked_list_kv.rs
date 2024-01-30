@@ -58,6 +58,18 @@ impl<U, T> List<U, T> {
     }
 }
 
+impl<U: std::cmp::PartialEq, T: Copy> List<U, T> {
+    pub fn update(&mut self, key: U, elem: T) {
+	let iter = self.iter_mut();
+
+	for item in iter {
+	    if item.0 == key {
+		item.1 = elem;
+	    }
+	}
+    }
+}
+
 impl<U, T> Iterator for IntoIter<U, T> {
     type Item = (U, T);
 
@@ -162,5 +174,14 @@ mod tests {
 	assert_eq!(iter.next(), Some(&mut ("b", 3)));
 	assert_eq!(iter.next(), Some(&mut ("c", 2)));
 	assert_eq!(iter.next(), Some(&mut ("a", 1)));
+    }
+
+    #[test]
+    fn update() {
+	let mut list = List::new();
+	list.push("a", 1);
+	list.update("a", 2);
+
+	assert_eq!(list.pop(), Some(("a", 2)));
     }
 }
