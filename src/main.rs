@@ -1,75 +1,69 @@
-use std::fs::{read_to_string, File};
-
-use std::io::{BufRead, BufReader, Error, ErrorKind};
-
 mod data_structures;
-mod search;
+mod domain;
 mod sorting;
-mod union_find;
 
-fn read_lines(filename: &str) -> Vec<String> {
-    let mut result = Vec::new();
+fn main() {}
 
-    for line in read_to_string(filename).unwrap().lines() {
-	result.push(line.to_string())
-    }
+// fn read_lines(filename: &str) -> Vec<String> {
+//     let mut result = Vec::new();
 
-    result
-}
+//     for line in read_to_string(filename).unwrap().lines() {
+//	result.push(line.to_string())
+//     }
 
-fn load_from_file(file_path: &str) -> Result<Vec<i64>, Error> {
-    let file = File::open(file_path).expect("file wasn't found.");
-    let reader = BufReader::new(file);
+//     result
+// }
 
-    let mut numbers = Vec::new();
+// fn load_from_file(file_path: &str) -> Result<Vec<i64>, Error> {
+//     let file = File::open(file_path).expect("file wasn't found.");
+//     let reader = BufReader::new(file);
 
-    for line in reader.lines() {
-	numbers.push(
-	    line?
-		.trim()
-		.parse()
-		.map_err(|e| Error::new(ErrorKind::InvalidData, e))?,
-	);
-    }
+//     let mut numbers = Vec::new();
 
-    Ok(numbers)
-}
+//     for line in reader.lines() {
+//	numbers.push(
+//	    line?
+//		.trim()
+//		.parse()
+//		.map_err(|e| Error::new(ErrorKind::InvalidData, e))?,
+//	);
+//     }
 
-fn main() {
-    ///////////////////////////////////////////////////////////////////////////
-    //             tiny - 10, medium 625, large 1000000, ularge               //
-    ///////////////////////////////////////////////////////////////////////////
-    // let input = read_lines("mediumUF.txt");
+//     Ok(numbers)
+// }
 
-    // let mut union = union_find::union_find::UF::new(625);
+///////////////////////////////////////////////////////////////////////////
+//             tiny - 10, medium 625, large 1000000, ularge               //
+///////////////////////////////////////////////////////////////////////////
+// let input = read_lines("mediumUF.txt");
 
-    // for i in input {
-    //	let mut n = i.split_whitespace();
-    //	let tuple = (
-    //	    n.next().unwrap().parse::<i32>().unwrap(),
-    //	    n.next().unwrap().parse::<i32>().unwrap(),
-    //	);
+// let mut union = union_find::union_find::UF::new(625);
 
-    //	if union.connected(tuple.0, tuple.1) {
-    //	    continue;
-    //	} else {
-    //	    union.union(tuple.0, tuple.1);
-    //	    println!("{} {}", tuple.0, tuple.1);
-    //	}
-    // }
+// for i in input {
+//	let mut n = i.split_whitespace();
+//	let tuple = (
+//	    n.next().unwrap().parse::<i32>().unwrap(),
+//	    n.next().unwrap().parse::<i32>().unwrap(),
+//	);
 
-    // println!("{} components", union.count());
+//	if union.connected(tuple.0, tuple.1) {
+//	    continue;
+//	} else {
+//	    union.union(tuple.0, tuple.1);
+//	    println!("{} {}", tuple.0, tuple.1);
+//	}
+// }
 
-    // let mut input = load_from_file("1Mints.txt");
-    // let mut input = vec![4, 3, 6, 5, 7, 9, 1, 12, 14, 15, 11, 8, 0, 10, 13, 2];
+// println!("{} components", union.count());
 
-    // sorting::quick_sort::quick_sort(&mut input);
-    // sorting::quick_sort::quick_sort(&mut input.as_mut().unwrap());
-    // println!("{:?}", input);
+// let mut input = load_from_file("1Mints.txt");
+// let mut input = vec![4, 3, 6, 5, 7, 9, 1, 12, 14, 15, 11, 8, 0, 10, 13, 2];
 
-    let mut list = data_structures::linked_list_kv::List::<i64, i64>::new();
-    list.push(3, 4);
+// let mut a = search::ordered_symbol_table::OrderedST::new();
+// a.put("t", 3);
+// a.put("v", 8);
+// a.put("d", 11);
 
-    let search = search::unordered_linked_list::get(list, 2);
-    println!("{:?}", search)
-}
+// sorting::quick_sort::quick_sort(&mut input);
+// sorting::quick_sort::quick_sort(&mut input.as_mut().unwrap());
+// println!("{:?}", input);
