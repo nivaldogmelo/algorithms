@@ -1,19 +1,14 @@
-pub trait Bag<T> {
-    fn add(&self, item: T);
-    fn is_empty(&self) -> bool;
-    fn size(&self) -> usize;
+pub trait UnionFind<T> {
+    fn union(&mut self, p: T, q: T);
+    fn find(&self, p: T) -> usize;
+    fn connected(&self, p: T, q: T) -> bool;
+    fn count(&self) -> usize;
 }
 
-pub trait Queue<T> {
-    fn enqueue(&self, item: T);
-    fn dequeue(&self) -> T;
-    fn is_empty(&self) -> bool;
-    fn size(&self) -> usize;
-}
-
-pub trait Stack<T> {
-    fn push(&self, item: T);
-    fn pop(&self) -> T;
+pub trait PriorityQueue<T> {
+    fn insert(&mut self, key: T);
+    fn max(&self) -> T;
+    fn del_max(&self) -> T;
     fn is_empty(&self) -> bool;
     fn size(&self) -> usize;
 }

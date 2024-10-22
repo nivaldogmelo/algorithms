@@ -1,9 +1,11 @@
-// pub mod bu_merge_sort;
 pub mod insertion;
-// pub mod quick_sort;
+pub mod merge;
+pub mod quick;
 pub mod selection;
-// pub mod shell_sort;
-// pub mod td_merge_sort;
+pub mod shell;
 
 pub use insertion::*;
+pub use merge::*;
+pub use quick::*;
 pub use selection::*;
+pub use shell::*;
