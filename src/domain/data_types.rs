@@ -7,8 +7,8 @@ pub trait UnionFind<T> {
 
 pub trait PriorityQueue<T> {
     fn insert(&mut self, key: T);
-    fn max(&self) -> T;
-    fn del_max(&self) -> T;
+    fn max(&self) -> &T;
+    fn del_max(&mut self) -> Option<T>;
     fn is_empty(&self) -> bool;
     fn size(&self) -> usize;
 }
