@@ -36,31 +36,21 @@ impl<T: std::cmp::PartialOrd> PriorityQueue<T> for PQ<T> {
     fn insert(&mut self, key: T) {
         self.itens.push(key);
         self.size += 1;
+
+        if self.size > 1 {
+            for i in 1..self.itens.len() - 1 {
+                if self.itens[i] < self.itens[i - 1] {
+                    self.itens.swap(i, i - 1);
+                }
+            }
+        }
     }
 
     fn max(&self) -> &T {
-        let mut max = &self.itens[0];
-
-        self.itens.iter().for_each(|i| {
-            if i > max {
-                max = i;
-            }
-        });
-
-        max
+        &self.itens[self.size - 1]
     }
 
     fn del_max(&mut self) -> Option<T> {
-        let last_index = self.itens.len() - 1;
-        let mut max = last_index;
-
-        for i in last_index..0 {
-            if self.itens[i] > self.itens[last_index] {
-                self.itens.swap(i, max);
-                max = i
-            }
-        }
-
         self.size -= 1;
         self.itens.pop()
     }
