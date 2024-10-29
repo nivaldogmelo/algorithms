@@ -1,5 +1,5 @@
 pub struct BinaryHeap<T: Default> {
-    val: Vec<T>,
+    pub val: Vec<T>,
 }
 
 impl<T> BinaryHeap<T>
@@ -30,7 +30,7 @@ where
     }
 
     fn heapify(&mut self) {
-	(self.val.len() / 2..1).for_each(|k| {
+	(1..(self.val.len() / 2) + 1).rev().for_each(|k| {
 	    self.sink(k);
 	});
     }
