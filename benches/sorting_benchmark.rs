@@ -1,6 +1,6 @@
 extern crate algorithms;
 use algorithms::sorting::{
-    bottom_up, insertion_sort, quick_sort, selection_sort, shell_sort, top_down,
+    bottom_up, heap_sort, insertion_sort, quick_sort, selection_sort, shell_sort, top_down,
 };
 
 use criterion::{black_box, Criterion};
@@ -57,6 +57,13 @@ pub fn benchmark_sorts(c: &mut Criterion) {
 	b.iter(|| {
 	    let mut subject = data.clone();
 	    quick_sort(black_box(&mut subject));
+	})
+    });
+
+    c.bench_function("heapsort", |b| {
+	b.iter(|| {
+	    let mut subject = data.clone();
+	    heap_sort(black_box(&mut subject));
 	})
     });
 }

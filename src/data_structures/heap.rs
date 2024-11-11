@@ -4,14 +4,8 @@ pub struct BinaryHeap<T: Default> {
 
 impl<T> BinaryHeap<T>
 where
-    T: std::cmp::PartialOrd + std::default::Default,
+    T: std::cmp::PartialOrd + std::default::Default + std::marker::Copy,
 {
-    pub fn new() -> Self {
-	Self {
-	    val: vec![T::default()],
-	}
-    }
-
     pub fn new_from_array(val: &mut [T]) -> Self {
 	let mut bh = Self::new();
 
@@ -20,13 +14,22 @@ where
 	}
 
 	(0..val.len()).for_each(|i| {
-	    let value = std::mem::take(&mut val[i]);
-
-	    bh.val.push(value);
+	    bh.val.push(val[i]);
 	});
 
 	bh.heapify();
 	bh
+    }
+}
+
+impl<T> BinaryHeap<T>
+where
+    T: std::cmp::PartialOrd + std::default::Default,
+{
+    pub fn new() -> Self {
+	Self {
+	    val: vec![T::default()],
+	}
     }
 
     fn heapify(&mut self) {
@@ -50,6 +53,31 @@ where
 	while 2 * k < self.val.len() {
 	    let mut j = 2 * k;
 	    if j + 1 < self.val.len() && self.val[j] < self.val[j + 1] {
+		j += 1;
+	    }
+
+	    if self.val[k] > self.val[j] {
+		break;
+	    }
+
+	    self.val.swap(k, j);
+
+	    k = j;
+	}
+    }
+
+    pub fn sink_to_n(&mut self, mut k: usize, n: usize) {
+	if n >= self.val.len() {
+	    return;
+	}
+
+	if k == 0 {
+	    k += 1;
+	}
+
+	while 2 * k <= n {
+	    let mut j = 2 * k;
+	    if j < n && self.val[j] < self.val[j + 1] {
 		j += 1;
 	    }
 
@@ -117,46 +145,11 @@ mod tests {
 	bh.val == original
     }
 
-    fn prop_str_heapified(data: Vec<String>) -> bool {
-	let bh = BinaryHeap::new_from_array(&mut data.clone());
-	let mut is_heap = true;
-
-	for k in bh.val.len() / 2..0 {
-	    if (2 * k) + 1 < bh.val.len() && bh.val[2 * k + 1] > bh.val[k] {
-		is_heap = false;
-		break;
-	    }
-
-	    if bh.val[2 * k] > bh.val[k] {
-		is_heap = false;
-		break;
-	    }
-	}
-
-	is_heap
-    }
-
-    fn prop_str_permutation(data: Vec<String>) -> bool {
-	let mut bh = BinaryHeap::new_from_array(&mut data.clone());
-
-	let mut original = vec![String::default()];
-	original.append(&mut data.clone());
-
-	bh.val.sort();
-	original.sort();
-
-	bh.val == original
-    }
-
     #[test]
     fn quickcheck_heapified() {
 	QuickCheck::new()
 	    .tests(1000)
 	    .quickcheck(prop_number_heapified as fn(Vec<i32>) -> bool);
-
-	QuickCheck::new()
-	    .tests(1000)
-	    .quickcheck(prop_str_heapified as fn(Vec<String>) -> bool);
     }
 
     #[test]
@@ -164,10 +157,6 @@ mod tests {
 	QuickCheck::new()
 	    .tests(1000)
 	    .quickcheck(prop_number_permutation as fn(Vec<i32>) -> bool);
-
-	QuickCheck::new()
-	    .tests(1000)
-	    .quickcheck(prop_str_permutation as fn(Vec<String>) -> bool);
     }
 
     #[test]
