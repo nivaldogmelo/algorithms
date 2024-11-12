@@ -1,73 +1,82 @@
-type Link<T> = Option<Box<Node<T>>>;
+type Link<T> = Box<Node<T>>;
 
 struct Node<T> {
     item: T,
-    next: Link<T>,
+    next: Option<Link<T>>,
 }
 
 impl<T> Node<T> {
     fn new(item: T) -> Node<T> {
-        Node { item, next: None }
+	Node { item, next: None }
     }
 
-    fn add_next(&mut self, next: Link<T>) {
-        self.next = next;
+    fn add_next(&mut self, next: Option<Link<T>>) {
+	self.next = next;
     }
 }
 
 pub struct LinkedList<T> {
-    head: Link<T>,
+    head: Option<Link<T>>,
     size: usize,
 }
 
 impl<T> LinkedList<T> {
     pub fn new() -> Self {
-        Self {
-            head: None,
-            size: 0,
-        }
+	Self {
+	    head: None,
+	    size: 0,
+	}
+    }
+
+    pub fn iter(&self) -> LinkedListIter<T> {
+	LinkedListIter {
+	    current: self.head.as_deref(),
+	}
     }
 
     pub fn length(&self) -> usize {
-        self.size
+	self.size
     }
 
     pub fn insert_at_beginning(&mut self, item: T) {
-        let cur_head = self.head.take();
+	let cur_head = self.head.take();
 
-        let mut node = Node::new(item);
-        node.add_next(cur_head);
+	let mut node = Node::new(item);
+	node.add_next(cur_head);
 
-        self.head = Some(Box::new(node));
-        self.size += 1;
+	self.head = Some(Box::new(node));
+	self.size += 1;
     }
 
     pub fn remove_from_beginning(&mut self) -> Option<T> {
-        let cur_head = self.head.take();
+	let cur_head = self.head.take();
 
-        match cur_head {
-            Some(node) => {
-                self.head = node.next;
-                Some(node.item)
-            }
-            None => None,
-        }
+	match cur_head {
+	    Some(node) => {
+		self.head = node.next;
+		self.size -= 1;
+		Some(node.item)
+	    }
+	    None => None,
+	}
     }
 }
 
-impl<T> Iterator for LinkedList<T> {
-    type Item = T;
+pub struct LinkedListIter<'a, T> {
+    current: Option<&'a Node<T>>,
+}
+
+impl<'a, T> Iterator for LinkedListIter<'a, T> {
+    type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let cur_head = self.head.take();
-
-        match cur_head {
-            Some(node) => {
-                self.head = node.next;
-                Some(node.item)
-            }
-            None => None,
-        }
+	match self.current {
+	    Some(node) => {
+		self.current = node.next.as_deref();
+		Some(&node.item)
+	    }
+	    None => None,
+	}
     }
 }
 
@@ -75,41 +84,113 @@ impl<T> Iterator for LinkedList<T> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_length() {
-        let mut ll: LinkedList<i32> = LinkedList::<i32>::new();
-        assert_eq!(ll.length(), 0);
+    use quickcheck::QuickCheck;
 
-        ll.insert_at_beginning(1);
-        assert_eq!(ll.length(), 1);
+    fn prop_number(data: Vec<i32>) -> Result<(), String> {
+	let mut linked_list = LinkedList::new();
+	let size = data.len();
+	let mut test_data = data.clone();
+
+	(0..data.len()).for_each(|i| {
+	    linked_list.insert_at_beginning(data[i]);
+	});
+
+	if linked_list.length() != size {
+	    return Err(format!(
+		"Size mismatch after insert: expected {}, got {}",
+		size,
+		linked_list.length()
+	    ));
+	}
+
+	for value in linked_list.iter() {
+	    if !data.contains(value) {
+		return Err(format!(
+		    "Value mismatch on insert: value {} not found",
+		    *value,
+		));
+	    }
+	}
+
+	for _i in 0..linked_list.length() {
+	    let value = linked_list.remove_from_beginning();
+
+	    if value != test_data.pop() {
+		return Err(format!(
+		    "value mismatch on remove: expected {:?}, got {:?}",
+		    test_data.pop(),
+		    Some(value),
+		));
+	    }
+	}
+
+	if linked_list.length() != test_data.len() {
+	    return Err(format!(
+		"Size mismatch after remove: expected {}, got {}",
+		test_data.len(),
+		linked_list.length()
+	    ));
+	}
+
+	Ok(())
+    }
+
+    fn prop_string(data: Vec<String>) -> Result<(), String> {
+	let mut linked_list = LinkedList::new();
+	let size = data.len();
+	let mut test_data = data.clone();
+
+	(0..data.len()).for_each(|i| {
+	    linked_list.insert_at_beginning(data[i].clone());
+	});
+
+	if linked_list.length() != size {
+	    return Err(format!(
+		"Size mismatch after insert: expected {}, got {}",
+		size,
+		linked_list.length()
+	    ));
+	}
+
+	for value in linked_list.iter() {
+	    if !data.contains(value) {
+		return Err(format!(
+		    "Value mismatch on insert: value {} not found",
+		    *value,
+		));
+	    }
+	}
+
+	for _i in 0..linked_list.length() {
+	    let value = linked_list.remove_from_beginning();
+
+	    if value != test_data.pop() {
+		return Err(format!(
+		    "value mismatch on remove: expected {:?}, got {:?}",
+		    test_data.pop(),
+		    Some(value),
+		));
+	    }
+	}
+
+	if linked_list.length() != test_data.len() {
+	    return Err(format!(
+		"Size mismatch after remove: expected {}, got {}",
+		test_data.len(),
+		linked_list.length()
+	    ));
+	}
+
+	Ok(())
     }
 
     #[test]
-    fn test_insert_at_beginning() {
-        let mut ll: LinkedList<i32> = LinkedList::<i32>::new();
-
-        ll.insert_at_beginning(1);
-        ll.insert_at_beginning(2);
-        ll.insert_at_beginning(3);
-
-        assert_eq!(ll.collect::<Vec<i32>>(), vec![3, 2, 1]);
-    }
-
-    #[test]
-    fn test_remove_from_beginning() {
-        let mut ll: LinkedList<i32> = LinkedList::<i32>::new();
-
-        ll.insert_at_beginning(1);
-        ll.insert_at_beginning(2);
-        ll.insert_at_beginning(3);
-
-        let item = ll.remove_from_beginning();
-        assert_eq!(item, Some(3));
-
-        let item = ll.remove_from_beginning();
-        assert_eq!(item, Some(2));
-
-        let item = ll.remove_from_beginning();
-        assert_eq!(item, Some(1));
+    fn quickcheck_get() {
+	QuickCheck::new()
+	    .tests(1000)
+	    .quickcheck(prop_number as fn(Vec<i32>) -> Result<(), String>);
+	QuickCheck::new()
+	    .tests(1000)
+	    .quickcheck(prop_string as fn(Vec<String>) -> Result<(), String>);
     }
 }
