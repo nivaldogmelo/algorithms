@@ -12,3 +12,12 @@ pub trait PriorityQueue<T> {
     fn is_empty(&self) -> bool;
     fn size(&self) -> usize;
 }
+
+pub trait SymbolTable<K, V> {
+    fn put(&mut self, key: K, value: V);
+    fn get(&mut self, key: K) -> Option<&V>;
+    fn delete(&mut self, key: K);
+    fn contains(&self, key: K) -> bool;
+    fn is_empty(&self) -> bool;
+    fn size(&self) -> usize;
+}
