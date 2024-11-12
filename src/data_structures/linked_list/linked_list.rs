@@ -34,6 +34,12 @@ impl<T> LinkedList<T> {
 	}
     }
 
+    pub fn iter_mut(&mut self) -> LinkedListIterMut<T> {
+	LinkedListIterMut {
+	    current: self.head.as_deref_mut(),
+	}
+    }
+
     pub fn length(&self) -> usize {
 	self.size
     }
@@ -77,6 +83,21 @@ impl<'a, T> Iterator for LinkedListIter<'a, T> {
 	    }
 	    None => None,
 	}
+    }
+}
+
+pub struct LinkedListIterMut<'a, T> {
+    current: Option<&'a mut Node<T>>,
+}
+
+impl<'a, T> Iterator for LinkedListIterMut<'a, T> {
+    type Item = &'a mut T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+	self.current.take().map(|node| {
+	    self.current = node.next.as_deref_mut();
+	    &mut node.item
+	})
     }
 }
 
