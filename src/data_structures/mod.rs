@@ -1,13 +1,11 @@
 mod heap;
 mod linked_list;
-mod union_find;
-// mod linked_list_kv;
 mod priority_queue;
-// mod stack;
+mod union_find;
+mod symbol_table;
 
-pub use linked_list::*;
-pub use union_find::*;
-// pub use linked_list_kv::*;
 pub use heap::*;
+pub use linked_list::*;
 pub use priority_queue::*;
-// pub use stack::*;
+pub use union_find::*;
+pub use symbol_table::*;
